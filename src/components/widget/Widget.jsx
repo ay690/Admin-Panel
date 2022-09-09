@@ -58,7 +58,7 @@ switch(type){
         case "balance":
             data = {
                 title:"BALANCE",
-                isMoney: false,
+                isMoney: true,
                 link: "Show Details",
                 icon: <AccountBalanceWalletOutlinedIcon className='icon' 
                 style={{
