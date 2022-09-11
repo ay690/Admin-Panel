@@ -3,6 +3,7 @@ import Login from "./pages/login/Login";
 import New from "./pages/new/New";
 import Single from "./pages/single/Single";
 import List from "./pages/list/List";
+import "./style/dark.scss";
 
 import {
   BrowserRouter,
@@ -13,7 +14,7 @@ import { productInputs, userInputs } from "./formsource";
 
 function App() {
   return (
-  <div className="App">
+  <div className="app dark">
    <BrowserRouter>
      <Routes>
       <Route path = "/">
