@@ -1,16 +1,69 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import "./new.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
 import { useState } from "react";
 import { collection, doc, setDoc, addDoc, serverTimestamp } from "firebase/firestore"; 
-import {auth, db } from "../../firebase";
+import { auth, storage, db } from "../../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const New = ({ inputs, title }) => {
   const [file, setFile] = useState("");
   const [data, setData] = useState({});
+  const [per, setPerc] = useState(null); //per -> percentage
+
+  useEffect(() => {
+   const uploadFile = () => {
+
+    //if you use multiple files with the same name its gonna overwrite, so to prevent that
+    //we will create a unique name with a time stamp onto to it
+    // name = timeStamp + file name
+    const name = new Date().getTime() + file.name;
+    console.log(name);
+
+    const storageRef = ref(storage, file.name);
+
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+uploadTask.on('state_changed', 
+  (snapshot) => {
+    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    console.log('Upload is ' + progress + '% done');
+    setPerc(progress);
+    switch (snapshot.state) {
+      case 'paused':
+        console.log('Upload is paused');
+        break;
+      case 'running':
+        console.log('Upload is running');
+        break;
+      default:
+       break;
+    }
+  }, 
+  (error) => {
+    // Handle unsuccessful uploads
+    console.log(error);
+  }, 
+  () => {
+    // Handle successful uploads on complete
+    // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+      //console.log('File available at', downloadURL);
+      setData((prev) => ({...prev, img:downloadURL}));
+    });
+  }
+);
+
+  }
+
+  file && uploadFile();
+
+},[file])
+
+console.log(data);
 
   const handleInput = (e) =>{
     const id = e.target.id;
@@ -19,7 +72,7 @@ const New = ({ inputs, title }) => {
     setData({...data, [id]: value});
   };
   
-  console.log(data);
+  //console.log(data);
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -81,7 +134,7 @@ const New = ({ inputs, title }) => {
                   id={input.id} type={input.type} placeholder={input.placeholder} onChange = { handleInput } />
                 </div>
               ))}
-              <button type='submit' >Send</button>
+              <button disabled = {per !== null && per < 100} type='submit' >Send</button>
             </form>
           </div>
         </div>
