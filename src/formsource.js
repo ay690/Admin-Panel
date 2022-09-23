@@ -4,7 +4,7 @@ export const userInputs = [
       id: "username",
       label: "Username",
       type: "text",
-      placeholder: "john_doe",
+      placeholder: "ani_y",
     },
     {
       id: "displayName",
